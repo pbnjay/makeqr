@@ -13,14 +13,21 @@ import (
 	"rsc.io/qr"
 )
 
-const block = "\u2588\u2588"
+var (
+	block     = "\u2588\u2588"
+	antiblock = "  "
+)
 
 func main() {
+	invert := flag.Bool("i", false, "invert colors (e.g. if you use a dark-on-light terminal theme)")
 	totpSecret := flag.String("totp", "", "Secret for Time-based One Time Password (use Issuer:your@account.com for content")
 	lvl := flag.String("l", "L", "QR redundancy level (L,M,Q,H)")
 	flag.Parse()
 
 	checkBase32 := regexp.MustCompile("[^a-z234567=]")
+	if *invert {
+		block, antiblock = antiblock, block
+	}
 
 	content := flag.Arg(0)
 	if *totpSecret != "" {
@@ -68,7 +75,7 @@ func main() {
 		os.Stdout.WriteString(strings.Repeat(block, border))
 		for x := 0; x < code.Size; x++ {
 			if code.Black(x, y) {
-				os.Stdout.WriteString("  ")
+				os.Stdout.WriteString(antiblock)
 			} else {
 				os.Stdout.WriteString(block)
 			}
